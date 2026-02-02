@@ -1,0 +1,26 @@
+<div class="form-container">
+  <form (ngSubmit)="save()">
+
+    <div class="program-name" *ngIf="savedProgramName">
+        {{ savedProgramName }}
+    </div>
+
+    <input
+      [formControl]="programName"
+      type="text"
+      placeholder="Put the name of new Cycle"
+    />
+
+    
+    <button type="button" (click)="save()" [disabled]="programName.invalid">
+        Save
+    </button>
+    
+    <div *ngIf="programName.touched && programName.invalid" class="error">
+      Program name is required
+    </div>
+
+  </form>
+
+
+</div>
