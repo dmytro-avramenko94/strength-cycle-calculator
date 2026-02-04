@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIf } from '@angular/common';
 
 
@@ -11,16 +11,29 @@ import { NgIf } from '@angular/common';
   styleUrl: './create-cycle.component.css'
 })
 export class CreateCycleComponent {
-  programName = new FormControl('', Validators.required)
+  programInputForm = new FormGroup({
+    programName: new FormControl('', Validators.required),
+  })
 
   savedProgramName: string | null = null
 
-  save() {
-    if (this.programName.invalid) return
+  disabledButton: boolean = false
 
-    this.savedProgramName = this.programName.value
-    this.programName.reset()    
+  get programName() {
+    return this.programInputForm.get('programName') as FormControl
   }
 
-  
+  save() {
+    if (this.programName.invalid) {
+      this.disabledButton = true
+      return
+    } else {
+      this.disabledButton = false
+      this.savedProgramName = this.programName.value
+      this.programName.reset()   
+    }
+
+     
+  }
+
 }
