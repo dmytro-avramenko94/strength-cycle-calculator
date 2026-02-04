@@ -1,24 +1,28 @@
 <div class="form-container">
-  <form (ngSubmit)="save()">
+  <form [formGroup]="programInputForm" (ngSubmit)="save()">
 
     <div class="program-name" *ngIf="savedProgramName">
         {{ savedProgramName }}
     </div>
 
     <input
-      [formControl]="programName"
+      formControlName="programName"
       type="text"
       placeholder="Put the name of new Cycle"
     />
 
     
-    <button type="button" (click)="save()" [disabled]="programName.invalid">
+    <button type="button" (click)="save()" [disabled]="disabledButton">
         Save
     </button>
     
-    <div *ngIf="programName.touched && programName.invalid" class="error">
+    <div *ngIf="programName.touched && programName.invalid && !savedProgramName" class="error">
       Program name is required
     </div>
+    <!-- I changed the code. Now the button is always showed, disabled only when 
+     the button is clicked and the form is invalid. But I got new bug: if the form
+     is invalid and the button clicked, button stay disabled anyway (even if I put some text
+     inside the input). -->
 
   </form>
 
