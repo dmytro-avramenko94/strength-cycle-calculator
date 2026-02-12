@@ -1,25 +1,98 @@
 <div class="form-container">
-  <form (ngSubmit)="save()">
+  <form [formGroup]="programInputForm" (ngSubmit)="onCalculate()">
 
     <div class="program-name" *ngIf="savedProgramName">
         {{ savedProgramName }}
     </div>
 
     <input
-      [formControl]="programName"
+      formControlName="programName"
       type="text"
       placeholder="Put the name of new Cycle"
     />
-
     
-    <button type="button" (click)="save()" [disabled]="programName.invalid">
-        Save
-    </button>
-    
-    <div *ngIf="programName.touched && programName.invalid" class="error">
+    <div 
+      *ngIf="
+      programInputForm.controls.programName.touched && 
+      programInputForm.controls.programName.invalid &&
+      !savedProgramName" 
+      class="error">
       Program name is required
     </div>
 
+    <div class="exercises-container" formArrayName="exercises">
+      @for (exercise of programInputForm.controls.exercises.controls; track exerciseIndex;
+      let exerciseIndex = $index) {
+        <div class="exercise-inputs-container" [formGroupName]="exerciseIndex">
+              <button class="delete-exercise-btn" (click)="onRemoveExercise(exerciseIndex)">x</button>
+              <div class="exercise-PR-input input-container">
+                <label for="exercise-name">Choose the exercise</label>
+                <select name="exercise-name" formControlName="exerciseName">
+                  <option>Deadlift</option>
+                  <option>Bench press</option>
+                  <option>Squat</option>
+                  <option>Pull-up</option>
+                  <option>OHP</option>
+                </select>
+              </div>
+              <div class="exercise-PR-input input-container">
+                <label for="exercise-pr">Put your PR for 1 rep</label>
+                <input name="exercise-pr" type="number" formControlName="exercisePr" />
+              </div>
+              <div class="exercise-qty80-input input-container">
+                <label for="exercise-qty80">Put the quantity of reps 80% of your PR</label>
+                <input name="exercise-qty80" type="number" formControlName="exerciseQty80" />
+              </div>
+              <div class="exercise-smallest-jump-input input-container">
+                <label for="exercise-smallest-jump">Put the smallest jump (e.g. 2.5kg)</label>
+                <input name="exercise-smallest-jump" type="number" formControlName="smallestJump" />
+              </div>
+              <div class="exercise-rounding-mode input-container">
+                <label for="exercise-rounding-mode">Choose the rounding mode</label>
+                <select name="exercise-rounding-mode" formControlName="roundingMode">
+                  <option>Nearest</option>
+                  <option>Down</option>
+                  <option>Up</option>
+                </select>
+              </div>
+              <div class="error">
+                <div *ngIf="exercise.controls.exerciseName.touched && exercise.controls.exerciseName.hasError('required')">
+                  Exercise name is required
+                </div>
+                <div *ngIf="exercise.controls.exercisePr.touched && exercise.controls.exercisePr.hasError('required')">
+                  Exercise PR field is required
+                </div>
+                <div *ngIf="exercise.controls.exercisePr.touched && exercise.controls.exercisePr.hasError('min')">
+                  Exercise PR should be more than 0
+                </div>
+                <div *ngIf="exercise.controls.exerciseQty80.touched && exercise.controls.exerciseQty80.hasError('required')">
+                  Quantity of reps 80% of your PR  field is required
+                </div>
+                <div *ngIf="exercise.controls.exerciseQty80.touched && exercise.controls.exerciseQty80.hasError('min')">
+                  Quantity of reps 80% of your PR should be more than 0
+                </div>
+                <div *ngIf="exercise.controls.exerciseQty80.touched && exercise.controls.exerciseQty80.hasError('max')">
+                  Quantity of reps 80% of your PR can't be more than 20
+                </div>
+                <div *ngIf="exercise.controls.smallestJump.touched && exercise.controls.smallestJump.hasError('required')">
+                  Smallest jump field is required
+                </div>
+                <div *ngIf="exercise.controls.smallestJump.touched && exercise.controls.smallestJump.hasError('min')">
+                  Smallest jump should be more than 0
+                </div>
+                <div *ngIf="exercise.controls.roundingMode.touched && exercise.controls.roundingMode.hasError('required')">
+                  Rounding mode field is required
+                </div>
+              </div>
+            </div>
+      }
+    </div>
+
+    <button type="button" (click)="onAddExercise()">Add exercise</button>
+
+    <button type="button" (click)="onCalculate()" [disabled]="programInputForm.invalid">
+        Calculate
+    </button>
   </form>
 
 

@@ -1,6 +1,19 @@
-import { Component } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
+import { NgIf, NgForOf } from '@angular/common';
+
+type FormExercise = FormGroup<{
+  exerciseName: FormControl<string>
+  exercisePr: FormControl<number>
+  exerciseQty80: FormControl<number>
+  smallestJump: FormControl<number>
+  roundingMode: FormControl<string>
+}>
+
+type inputForm = FormGroup<{
+  programName: FormControl<string>
+  exercises: FormArray<FormExercise>
+}>
 
 
 @Component({
@@ -11,16 +24,44 @@ import { NgIf } from '@angular/common';
   styleUrl: './create-cycle.component.css'
 })
 export class CreateCycleComponent {
-  programName = new FormControl('', Validators.required)
+
+  fb = inject(NonNullableFormBuilder)
+
+  programInputForm: inputForm = this.fb.group({
+    programName: this.fb.control('', {validators: [Validators.required]}),
+    exercises: this.fb.array<FormExercise>([this.generateExercise()])
+  })
 
   savedProgramName: string | null = null
 
-  save() {
-    if (this.programName.invalid) return
+  onCalculate() {
+    if(this.programInputForm.controls.programName.invalid) return
 
-    this.savedProgramName = this.programName.value
-    this.programName.reset()    
+    this.savedProgramName = this.programInputForm.controls.programName.value
+    
+    console.log(this.programInputForm.getRawValue());
+    
   }
 
-  
+  generateExercise(): FormExercise {
+    return this.fb.group({
+      exerciseName: ['', Validators.required],
+      exercisePr: [0, {validators: [Validators.required, Validators.min(1)]}],
+      exerciseQty80: [0, {validators: [Validators.required, Validators.min(1), Validators.max(20)]}],
+      smallestJump: [0, {validators: [Validators.required, Validators.min(1)]}],
+      roundingMode: ['', Validators.required]
+    })
+  }
+
+  onAddExercise(): void {
+    this.programInputForm.controls.exercises.push(this.generateExercise())
+  }
+
+  onRemoveExercise(exerciseIndex: number) {
+    this.programInputForm.controls.exercises.removeAt(exerciseIndex)
+  }
+
+  get exercises() {
+  return this.programInputForm.controls.exercises;
+}
 }
