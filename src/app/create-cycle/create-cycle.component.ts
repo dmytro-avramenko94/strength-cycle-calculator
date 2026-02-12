@@ -1,11 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { NgIf, NgForOf } from '@angular/common';
 
 type FormExercise = FormGroup<{
   exerciseName: FormControl<string>
   exercisePr: FormControl<number>
   exerciseQty80: FormControl<number>
+  smallestJump: FormControl<number>
+  roundingMode: FormControl<string>
 }>
 
 type inputForm = FormGroup<{
@@ -38,14 +40,16 @@ export class CreateCycleComponent {
     this.savedProgramName = this.programInputForm.controls.programName.value
     
     console.log(this.programInputForm.getRawValue());
-    this.programInputForm.controls.programName.reset()
+    
   }
 
   generateExercise(): FormExercise {
     return this.fb.group({
-      exerciseName: '',
-      exercisePr: 0,
-      exerciseQty80: 0
+      exerciseName: ['', Validators.required],
+      exercisePr: [0, {validators: [Validators.required, Validators.min(1)]}],
+      exerciseQty80: [0, {validators: [Validators.required, Validators.min(1), Validators.max(20)]}],
+      smallestJump: [0, {validators: [Validators.required, Validators.min(1)]}],
+      roundingMode: ['', Validators.required]
     })
   }
 
@@ -57,32 +61,7 @@ export class CreateCycleComponent {
     this.programInputForm.controls.exercises.removeAt(exerciseIndex)
   }
 
-
-  // programInputForm = new FormGroup({
-  //   programName: new FormControl('', Validators.required),
-  //   // exercises: new FormArray<FormExercise>([this.onAddExercise()])
-  // })
-
-  // savedProgramName: string | null = null
-
-  // disabledButton: boolean = false
-
-  // get programName() {
-  //   return this.programInputForm.get('programName') as FormControl
-  // }
-
-  // onCalculate() {
-  //   if (this.programName.invalid) {
-  //     this.disabledButton = true
-  //     return
-  //   } else {
-  //     this.disabledButton = false
-  //     this.savedProgramName = this.programName.value
-  //     this.programName.reset()   
-  //   }
-  // }
-
-  // onSubmit() {
-  //   console.log(this.programInputForm.getRawValue());
-  // }
+  get exercises() {
+  return this.programInputForm.controls.exercises;
+}
 }
