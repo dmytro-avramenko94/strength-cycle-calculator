@@ -12,10 +12,7 @@
     />
     
     <div 
-      *ngIf="
-      programInputForm.controls.programName.touched && 
-      programInputForm.controls.programName.invalid &&
-      !savedProgramName" 
+      *ngIf="isProgramNameValid" 
       class="error">
       Program name is required
     </div>
@@ -27,7 +24,9 @@
               <button class="delete-exercise-btn" (click)="onRemoveExercise(exerciseIndex)">x</button>
               <div class="exercise-PR-input input-container">
                 <label for="exercise-name">Choose the exercise</label>
-                <select name="exercise-name" formControlName="exerciseName">
+                <select 
+                name="exercise-name" 
+                formControlName="exerciseName">
                   <option>Deadlift</option>
                   <option>Bench press</option>
                   <option>Squat</option>

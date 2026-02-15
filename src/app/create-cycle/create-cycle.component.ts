@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
-import { NgIf, NgForOf } from '@angular/common';
+import { NgIf } from '@angular/common';
+
 
 type FormExercise = FormGroup<{
   exerciseName: FormControl<string>
@@ -25,7 +26,7 @@ type inputForm = FormGroup<{
 })
 export class CreateCycleComponent {
 
-  fb = inject(NonNullableFormBuilder)
+  private fb = inject(NonNullableFormBuilder)
 
   programInputForm: inputForm = this.fb.group({
     programName: this.fb.control('', {validators: [Validators.required]}),
@@ -62,6 +63,13 @@ export class CreateCycleComponent {
   }
 
   get exercises() {
-  return this.programInputForm.controls.exercises;
-}
+   return this.programInputForm.controls.exercises;
+  }
+
+  get isProgramNameValid(): boolean {
+    return (this.programInputForm.controls.programName.touched &&
+      this.programInputForm.controls.programName.invalid &&
+      !this.savedProgramName
+    )  
+  }
 }
