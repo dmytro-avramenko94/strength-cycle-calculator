@@ -17,3 +17,18 @@ body {
 .center {
   text-align: center;
 }
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+.btn-std {
+  border: 2px solid black;
+  text-decoration: none;
+  padding: 10px 20px;
+  background-color: green;
+  color: black;
+  border-radius: 10px;
+}
