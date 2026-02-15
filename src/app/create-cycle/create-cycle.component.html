@@ -1,5 +1,5 @@
 <div class="form-container">
-  <form [formGroup]="programInputForm" (ngSubmit)="save()">
+  <form [formGroup]="programInputForm" (ngSubmit)="onCalculate()">
 
     <div class="program-name" *ngIf="savedProgramName">
         {{ savedProgramName }}
@@ -10,20 +10,49 @@
       type="text"
       placeholder="Put the name of new Cycle"
     />
-
     
-    <button type="button" (click)="save()" [disabled]="disabledButton">
-        Save
-    </button>
-    
-    <div *ngIf="programName.touched && programName.invalid && !savedProgramName" class="error">
+    <div 
+      *ngIf="
+      programInputForm.controls.programName.touched && 
+      programInputForm.controls.programName.invalid &&
+      !savedProgramName" 
+      class="error">
       Program name is required
     </div>
-    <!-- I changed the code. Now the button is always showed, disabled only when 
-     the button is clicked and the form is invalid. But I got new bug: if the form
-     is invalid and the button clicked, button stay disabled anyway (even if I put some text
-     inside the input). -->
 
+    <div class="exercises-container" formArrayName="exercises">
+      @for (exercise of programInputForm.controls.exercises.controls; track exerciseIndex;
+      let exerciseIndex = $index) {
+        <div class="exercise-inputs-container" [formGroupName]="exerciseIndex">
+              <button class="delete-exercise-btn" (click)="onRemoveExercise(exerciseIndex)">x</button>
+              <div class="exercise-PR-input input-container">
+                <label for="exercise-name">Choose the exercise</label>
+                <select name="exercise-name" formControlName="exerciseName">
+                  <option>Deadlift</option>
+                  <option>Bench press</option>
+                  <option>Squats</option>
+                  <option>Pull-ups</option>
+                  <option>OHP</option>
+                </select>
+              </div>
+              <div class="exercise-PR-input input-container">
+                <label for="exercise-pr">Put your PR for 1 rep</label>
+                <input name="exercise-pr" type="number" formControlName="exercisePr" />
+              </div>
+              <div class="exercise-qty80-input input-container">
+                <label for="exercise-qty80">Put the quantity of reps 80% of your PR</label>
+                <input name="exercise-qty80" type="number" formControlName="exerciseQty80" />
+              </div>
+            </div>
+      }
+    </div>
+
+    <button type="button" (click)="onAddExercise()">Add exercise</button>
+
+    <button type="button" (click)="onCalculate()" 
+    [disabled]="programInputForm.controls.programName.invalid && !savedProgramName">
+        Calculate
+    </button>
   </form>
 
 
