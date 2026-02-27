@@ -1,10 +1,6 @@
 <div class="form-container">
   <form [formGroup]="programInputForm" (ngSubmit)="onCalculate()">
 
-    <div class="program-name" *ngIf="savedProgramName">
-        {{ savedProgramName }}
-    </div>
-
     <input
       formControlName="programName"
       type="text"
@@ -27,11 +23,10 @@
                 <select 
                 name="exercise-name" 
                 formControlName="exerciseName">
-                  <option>Deadlift</option>
-                  <option>Bench press</option>
-                  <option>Squat</option>
-                  <option>Pull-up</option>
-                  <option>OHP</option>
+                  <option
+                  *ngFor="let exercise of exercisesArray">
+                  {{exercise.name}}
+                  </option>
                 </select>
               </div>
               <div class="exercise-PR-input input-container">

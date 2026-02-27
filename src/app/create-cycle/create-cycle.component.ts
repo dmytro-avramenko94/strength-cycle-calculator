@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
-import { NgIf } from '@angular/common';
+import { NgIf, NgForOf } from '@angular/common';
+import { exercisesArray } from '../../exercises';
 
 
 type FormExercise = FormGroup<{
@@ -20,7 +21,7 @@ type inputForm = FormGroup<{
 @Component({
   selector: 'app-create-cycle',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf],
+  imports: [ReactiveFormsModule, NgIf, NgForOf],
   templateUrl: './create-cycle.component.html',
   styleUrl: './create-cycle.component.css'
 })
@@ -28,20 +29,25 @@ export class CreateCycleComponent {
 
   private fb = inject(NonNullableFormBuilder)
 
+  get exercises() {
+   return this.programInputForm.controls.exercises;
+  }
+
+  get isProgramNameValid(): boolean {
+    return (this.programInputForm.controls.programName.touched &&
+      this.programInputForm.controls.programName.invalid
+    )
+  }
+
   programInputForm: inputForm = this.fb.group({
     programName: this.fb.control('', {validators: [Validators.required]}),
     exercises: this.fb.array<FormExercise>([this.generateExercise()])
   })
 
-  savedProgramName: string | null = null
-
   onCalculate() {
     if(this.programInputForm.controls.programName.invalid) return
-
-    this.savedProgramName = this.programInputForm.controls.programName.value
     
     console.log(this.programInputForm.getRawValue());
-    
   }
 
   generateExercise(): FormExercise {
@@ -62,14 +68,6 @@ export class CreateCycleComponent {
     this.programInputForm.controls.exercises.removeAt(exerciseIndex)
   }
 
-  get exercises() {
-   return this.programInputForm.controls.exercises;
-  }
+  exercisesArray = exercisesArray
 
-  get isProgramNameValid(): boolean {
-    return (this.programInputForm.controls.programName.touched &&
-      this.programInputForm.controls.programName.invalid &&
-      !this.savedProgramName
-    )  
-  }
 }
