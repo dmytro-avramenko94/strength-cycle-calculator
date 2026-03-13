@@ -48,6 +48,9 @@
                   <option>Down</option>
                   <option>Up</option>
                 </select>
+                <div class="exercise-week5-suggest">
+                  Suggest for week 5 (5x5): {{ week5SuggestedWeight[exerciseIndex] }}
+                </div>
               </div>
               <div class="error">
                 <div *ngIf="exercise.controls.exerciseName.touched && exercise.controls.exerciseName.hasError('required')">

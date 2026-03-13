@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
-import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder } from '@angular/forms';
+import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder, FormsModule } from '@angular/forms';
 import { NgIf, NgForOf } from '@angular/common';
 import { exercisesArray } from '../../exercises';
+import { debounceTime, Observable, filter } from 'rxjs';
 
 
 type FormExercise = FormGroup<{
@@ -21,7 +22,7 @@ type inputForm = FormGroup<{
 @Component({
   selector: 'app-create-cycle',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgForOf],
+  imports: [ReactiveFormsModule, FormsModule, NgIf, NgForOf],
   templateUrl: './create-cycle.component.html',
   styleUrl: './create-cycle.component.css'
 })
@@ -70,4 +71,34 @@ export class CreateCycleComponent {
 
   exercisesArray = exercisesArray
 
+  week5Suggested$: Observable<any> = this.exercises.valueChanges.pipe(
+      debounceTime(100),
+      filter((exercises) => exercises.every(exercise => 
+        exercise.exerciseName && 
+        exercise.exerciseName.length >= 2 &&
+        exercise.exercisePr &&
+        exercise.exercisePr >= 1 &&
+        exercise.smallestJump &&
+        exercise.smallestJump >= 1 &&
+        exercise.roundingMode
+        )),
+      )
+
+  week5SuggestedCalculation(exercises: any[]) {
+    return exercises.map((exercise: any) => {
+      const week5Weight = exercise.exercisePr * 0.85
+      return week5Weight
+    })
+  }
+
+  week5SuggestedWeight: number[] = []
+
+  ngOnInit() {
+    this.week5Suggested$.subscribe((data) => {
+      this.week5SuggestedWeight = this.week5SuggestedCalculation(data)
+    });
+  }
 }
+
+// Should I create type for "exercise" (for using in observeble) ?
+// Should I create separate function for the form validation (and can I use it inside the pipe)?
