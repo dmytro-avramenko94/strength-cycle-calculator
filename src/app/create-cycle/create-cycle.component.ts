@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder, FormsModule } from '@angular/forms';
 import { NgIf, NgForOf } from '@angular/common';
 import { exercisesArray } from '../../exercises';
-import { debounceTime, Observable, filter } from 'rxjs';
+import { debounceTime, Observable, filter, combineLatest, map } from 'rxjs';
 
 
 type FormExercise = FormGroup<{
@@ -18,6 +18,14 @@ type inputForm = FormGroup<{
   exercises: FormArray<FormExercise>
 }>
 
+type Exercise = {
+  exerciseName: string,
+  exercisePr: number,
+  exerciseQty80: number,
+  smallestJump: number,
+  roundingMode: string
+}
+
 
 @Component({
   selector: 'app-create-cycle',
@@ -29,6 +37,8 @@ type inputForm = FormGroup<{
 export class CreateCycleComponent {
 
   private fb = inject(NonNullableFormBuilder)
+
+  exercisesArray = exercisesArray
 
   get exercises() {
    return this.programInputForm.controls.exercises;
@@ -53,7 +63,7 @@ export class CreateCycleComponent {
 
   generateExercise(): FormExercise {
     return this.fb.group({
-      exerciseName: ['', Validators.required],
+      exerciseName: ['Deadlift', Validators.required],
       exercisePr: [0, {validators: [Validators.required, Validators.min(1)]}],
       exerciseQty80: [0, {validators: [Validators.required, Validators.min(1), Validators.max(20)]}],
       smallestJump: [0, {validators: [Validators.required, Validators.min(1)]}],
@@ -69,36 +79,28 @@ export class CreateCycleComponent {
     this.programInputForm.controls.exercises.removeAt(exerciseIndex)
   }
 
-  exercisesArray = exercisesArray
-
-  week5Suggested$: Observable<any> = this.exercises.valueChanges.pipe(
-      debounceTime(100),
-      filter((exercises) => exercises.every(exercise => 
-        exercise.exerciseName && 
-        exercise.exerciseName.length >= 2 &&
-        exercise.exercisePr &&
-        exercise.exercisePr >= 1 &&
-        exercise.smallestJump &&
-        exercise.smallestJump >= 1 &&
-        exercise.roundingMode
-        )),
-      )
-
-  week5SuggestedCalculation(exercises: any[]) {
-    return exercises.map((exercise: any) => {
-      const week5Weight = exercise.exercisePr * 0.85
-      return week5Weight
-    })
-  }
+  isExerciseFormValid$: Observable<string> = this.programInputForm.controls.exercises.statusChanges
 
   week5SuggestedWeight: number[] = []
 
+  week5Suggested$: Observable<any> = this.exercises.valueChanges
+
+  week5SuggestedCalculation(exercises: Exercise[]) {
+    return exercises.map((exercise: Exercise) => {
+      return exercise.exercisePr * 0.85
+    })
+  }
+
   ngOnInit() {
-    this.week5Suggested$.subscribe((data) => {
+    combineLatest({
+      status: this.isExerciseFormValid$, 
+      data: this.week5Suggested$
+    }).pipe(
+      debounceTime(100),
+      filter(({status}) => status === 'VALID')
+    )
+    .subscribe(({data}) => {
       this.week5SuggestedWeight = this.week5SuggestedCalculation(data)
-    });
+    })
   }
 }
-
-// Should I create type for "exercise" (for using in observeble) ?
-// Should I create separate function for the form validation (and can I use it inside the pipe)?
