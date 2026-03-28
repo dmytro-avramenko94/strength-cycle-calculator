@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, NonNullableFormBuilder, FormsModule } from '@angular/forms';
-import { NgIf, NgForOf } from '@angular/common';
-import { exercisesArray } from '../../exercises';
+import { NgIf, NgForOf, AsyncPipe } from '@angular/common';
 import { debounceTime, Observable, filter, combineLatest, map } from 'rxjs';
+import { exercisesArrayData } from '../../exercises';
 
 
 type FormExercise = FormGroup<{
@@ -30,7 +30,7 @@ type Exercise = {
 @Component({
   selector: 'app-create-cycle',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, NgIf, NgForOf],
+  imports: [ReactiveFormsModule, FormsModule, NgIf, NgForOf, AsyncPipe],
   templateUrl: './create-cycle.component.html',
   styleUrl: './create-cycle.component.css'
 })
@@ -38,7 +38,7 @@ export class CreateCycleComponent {
 
   private fb = inject(NonNullableFormBuilder)
 
-  exercisesArray = exercisesArray
+  exercisesArray = exercisesArrayData
 
   get exercises() {
    return this.programInputForm.controls.exercises;
@@ -63,7 +63,7 @@ export class CreateCycleComponent {
 
   generateExercise(): FormExercise {
     return this.fb.group({
-      exerciseName: ['Deadlift', Validators.required],
+      exerciseName: ['', {validators: [Validators.required]}],
       exercisePr: [0, {validators: [Validators.required, Validators.min(1)]}],
       exerciseQty80: [0, {validators: [Validators.required, Validators.min(1), Validators.max(20)]}],
       smallestJump: [0, {validators: [Validators.required, Validators.min(1)]}],
@@ -83,7 +83,19 @@ export class CreateCycleComponent {
 
   week5SuggestedWeight: number[] = []
 
-  week5Suggested$: Observable<any> = this.exercises.valueChanges
+  week5Suggested$ = combineLatest({
+    status: this.isExerciseFormValid$,
+    exerciseData: this.exercises.valueChanges
+  }).pipe(
+    debounceTime(100),
+    filter((data): data is {
+      status: string;
+      exerciseData: Exercise[];
+    } => data.status === 'VALID'),
+    map(({ exerciseData }) => this.week5SuggestedCalculation(exerciseData)
+    ))
+
+  usedExercisesArray: string[] = []
 
   week5SuggestedCalculation(exercises: Exercise[]) {
     return exercises.map((exercise: Exercise) => {
@@ -91,16 +103,9 @@ export class CreateCycleComponent {
     })
   }
 
-  ngOnInit() {
-    combineLatest({
-      status: this.isExerciseFormValid$, 
-      data: this.week5Suggested$
-    }).pipe(
-      debounceTime(100),
-      filter(({status}) => status === 'VALID')
-    )
-    .subscribe(({data}) => {
-      this.week5SuggestedWeight = this.week5SuggestedCalculation(data)
+  addExerciseToUsed(exercises: Exercise[]) {
+    return exercises.map((exercise: Exercise) => {
+      return exercise.exerciseName
     })
   }
 }

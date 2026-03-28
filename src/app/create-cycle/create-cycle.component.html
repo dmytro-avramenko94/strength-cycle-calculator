@@ -23,8 +23,10 @@
                 <select 
                 name="exercise-name" 
                 formControlName="exerciseName">
+                  <option> </option>
                   <option
-                  *ngFor="let exercise of exercisesArray">
+                  *ngFor="let exercise of exercisesArray"
+                  [disabled]="usedExercisesArray.includes(exercise.name)">
                   {{exercise.name}}
                   </option>
                 </select>
@@ -48,8 +50,10 @@
                   <option>Down</option>
                   <option>Up</option>
                 </select>
-                <div class="exercise-week5-suggest">
-                  Suggest for week 5 (5x5): {{ week5SuggestedWeight[exerciseIndex] }}
+                <div 
+                *ngIf="week5Suggested$ | async as week5Suggested"
+                class="exercise-week5-suggest">
+                  Suggest for week 5 (5x5): {{ week5Suggested[exerciseIndex] }}
                 </div>
               </div>
               <div class="error">

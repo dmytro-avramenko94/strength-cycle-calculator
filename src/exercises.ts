@@ -1,4 +1,4 @@
-export const exercisesArray = [
+export const exercisesArrayData = [
     {
         name: 'Deadlift',
         id: '001'
