@@ -1,29 +1,114 @@
 <div class="form-container">
-  <form [formGroup]="programInputForm" (ngSubmit)="save()">
-
-    <div class="program-name" *ngIf="savedProgramName">
-        {{ savedProgramName }}
-    </div>
+  <form [formGroup]="programInputForm" (ngSubmit)="onCalculate()">
 
     <input
       formControlName="programName"
       type="text"
       placeholder="Put the name of new Cycle"
     />
-
     
-    <button type="button" (click)="save()" [disabled]="disabledButton">
-        Save
-    </button>
-    
-    <div *ngIf="programName.touched && programName.invalid && !savedProgramName" class="error">
+    <div 
+      *ngIf="isProgramNameValid" 
+      class="error">
       Program name is required
     </div>
-    <!-- I changed the code. Now the button is always showed, disabled only when 
-     the button is clicked and the form is invalid. But I got new bug: if the form
-     is invalid and the button clicked, button stay disabled anyway (even if I put some text
-     inside the input). -->
 
+    <div class="exercises-container" formArrayName="exercises">
+      @for (exercise of programInputForm.controls.exercises.controls; track exerciseIndex;
+      let exerciseIndex = $index) {
+        <div class="exercise-inputs-container" [formGroupName]="exerciseIndex">
+              <button class="delete-exercise-btn" (click)="onRemoveExercise(exerciseIndex)">x</button>
+              <div class="exercise-PR-input input-container">
+                <label for="exercise-name">Choose the exercise</label>
+                <select 
+                name="exercise-name" 
+                formControlName="exerciseName">
+                  <option> </option>
+                  <option
+                  *ngFor="let exercise of exercisesArray"
+                  [disabled]="usedExercisesArray.includes(exercise.name)">
+                  {{exercise.name}}
+                  </option>
+                </select>
+              </div>
+              <div class="exercise-PR-input input-container">
+                <label for="exercise-pr">Put your PR for 1 rep</label>
+                <input name="exercise-pr" type="number" formControlName="exercisePr" />
+              </div>
+              <div class="exercise-qty80-input input-container">
+                <label for="exercise-qty80">Put the quantity of reps 80% of your PR</label>
+                <input name="exercise-qty80" type="number" formControlName="exerciseQty80" />
+              </div>
+              <div class="exercise-smallest-jump-input input-container">
+                <label for="exercise-smallest-jump">Put the smallest jump (e.g. 2.5kg)</label>
+                <input name="exercise-smallest-jump" type="number" formControlName="smallestJump" />
+              </div>
+              <div class="exercise-rounding-mode input-container">
+                <label for="exercise-rounding-mode">Choose the rounding mode</label>
+                <select name="exercise-rounding-mode" formControlName="roundingMode">
+                  <option>Nearest</option>
+                  <option>Down</option>
+                  <option>Up</option>
+                </select>
+                <div 
+                *ngIf="week5Suggested$ | async as week5Suggested"
+                class="exercise-week5-suggest">
+                  Suggest for week 5 (5x5): {{ week5Suggested[exerciseIndex] }}
+                </div>
+                <div class="exercise-own-week5">
+                  <span>Do you want to change weight for Week 5 ?</span>
+                  <label class="switch">
+                    <input type="checkbox" (change)="isUseOwnWeek5Weight($event)">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div *ngIf="desiredWeek5Checked"
+                class="exercise-desired-week5 input-container">
+                  <label for="exercise-desired-week5">Put the desired weight for Week 5</label>
+                  <input name="exercise-desired-week5" formControlName="desiredWeek5" type="number"  />
+                </div>
+              </div>
+              <div class="error">
+                <div *ngIf="exercise.controls.exerciseName.touched && exercise.controls.exerciseName.hasError('required')">
+                  Exercise name is required
+                </div>
+                <div *ngIf="exercise.controls.exercisePr.touched && exercise.controls.exercisePr.hasError('required')">
+                  Exercise PR field is required
+                </div>
+                <div *ngIf="exercise.controls.exercisePr.touched && exercise.controls.exercisePr.hasError('min')">
+                  Exercise PR should be more than 0
+                </div>
+                <div *ngIf="exercise.controls.exerciseQty80.touched && exercise.controls.exerciseQty80.hasError('required')">
+                  Quantity of reps 80% of your PR  field is required
+                </div>
+                <div *ngIf="exercise.controls.exerciseQty80.touched && exercise.controls.exerciseQty80.hasError('min')">
+                  Quantity of reps 80% of your PR should be more than 0
+                </div>
+                <div *ngIf="exercise.controls.exerciseQty80.touched && exercise.controls.exerciseQty80.hasError('max')">
+                  Quantity of reps 80% of your PR can't be more than 20
+                </div>
+                <div *ngIf="exercise.controls.smallestJump.touched && exercise.controls.smallestJump.hasError('required')">
+                  Smallest jump field is required
+                </div>
+                <div *ngIf="exercise.controls.smallestJump.touched && exercise.controls.smallestJump.hasError('min')">
+                  Smallest jump should be more than 0
+                </div>
+                <div *ngIf="exercise.controls.roundingMode.touched && exercise.controls.roundingMode.hasError('required')">
+                  Rounding mode field is required
+                </div>
+                <div *ngIf="exercise.controls.desiredWeek5.touched && exercise.controls.desiredWeek5.hasError('required')">
+                  If you want to change the weight for Week 5, please put the weight
+                </div>
+              </div>
+            </div>
+      }
+    </div>
+
+    <button type="button" (click)="onAddExercise()">Add exercise</button>
+
+    <button type="button" (click)="onCalculate()" [disabled]="programInputForm.invalid">
+        Calculate
+    </button>
   </form>
 
 
