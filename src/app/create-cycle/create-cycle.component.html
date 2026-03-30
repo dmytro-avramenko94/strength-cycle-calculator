@@ -55,6 +55,18 @@
                 class="exercise-week5-suggest">
                   Suggest for week 5 (5x5): {{ week5Suggested[exerciseIndex] }}
                 </div>
+                <div class="exercise-own-week5">
+                  <span>Do you want to change weight for Week 5 ?</span>
+                  <label class="switch">
+                    <input type="checkbox" (change)="isUseOwnWeek5Weight($event)">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div *ngIf="desiredWeek5Checked"
+                class="exercise-desired-week5 input-container">
+                  <label for="exercise-desired-week5">Put the desired weight for Week 5</label>
+                  <input name="exercise-desired-week5" formControlName="desiredWeek5" type="number"  />
+                </div>
               </div>
               <div class="error">
                 <div *ngIf="exercise.controls.exerciseName.touched && exercise.controls.exerciseName.hasError('required')">
@@ -83,6 +95,9 @@
                 </div>
                 <div *ngIf="exercise.controls.roundingMode.touched && exercise.controls.roundingMode.hasError('required')">
                   Rounding mode field is required
+                </div>
+                <div *ngIf="exercise.controls.desiredWeek5.touched && exercise.controls.desiredWeek5.hasError('required')">
+                  If you want to change the weight for Week 5, please put the weight
                 </div>
               </div>
             </div>

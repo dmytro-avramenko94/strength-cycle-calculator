@@ -11,6 +11,7 @@ type FormExercise = FormGroup<{
   exerciseQty80: FormControl<number>
   smallestJump: FormControl<number>
   roundingMode: FormControl<string>
+  desiredWeek5: FormControl<number>
 }>
 
 type inputForm = FormGroup<{
@@ -23,7 +24,8 @@ type Exercise = {
   exercisePr: number,
   exerciseQty80: number,
   smallestJump: number,
-  roundingMode: string
+  roundingMode: string,
+  desiredWeek5: number
 }
 
 
@@ -67,7 +69,8 @@ export class CreateCycleComponent {
       exercisePr: [0, {validators: [Validators.required, Validators.min(1)]}],
       exerciseQty80: [0, {validators: [Validators.required, Validators.min(1), Validators.max(20)]}],
       smallestJump: [0, {validators: [Validators.required, Validators.min(1)]}],
-      roundingMode: ['', Validators.required]
+      roundingMode: ['', Validators.required],
+      desiredWeek5: [0, {validators: [Validators.required]}]
     })
   }
 
@@ -107,5 +110,16 @@ export class CreateCycleComponent {
     return exercises.map((exercise: Exercise) => {
       return exercise.exerciseName
     })
+  }
+
+  desiredWeek5Checked = false;
+
+  isUseOwnWeek5Weight(event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked
+    if (isChecked) {
+      this.desiredWeek5Checked = true
+    } else {
+      this.desiredWeek5Checked = false
+    }
   }
 }
