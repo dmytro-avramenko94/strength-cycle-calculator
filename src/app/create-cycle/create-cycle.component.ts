@@ -57,10 +57,43 @@ export class CreateCycleComponent {
     exercises: this.fb.array<FormExercise>([this.generateExercise()])
   })
 
+  jumpPersent = 0
+  jumpRaw = 0
+  weeklyJump = 0
+
   onCalculate() {
-    if(this.programInputForm.controls.programName.invalid) return
-    
-    console.log(this.programInputForm.getRawValue());
+
+    this.programInputForm.value.exercises?.map(exercise => {
+      if (exercise.exerciseQty80 && exercise.exerciseQty80 <= 5) {
+        this.jumpPersent = 0.05
+      } else if (exercise.exerciseQty80 && exercise.exerciseQty80 > 5 && exercise.exerciseQty80 <= 8) {
+        this.jumpPersent = 0.04
+      } else if (exercise.exerciseQty80 && exercise.exerciseQty80 > 8 && exercise.exerciseQty80 < 10) {
+        this.jumpPersent = 0.03
+      } else {
+        this.jumpPersent = 0.02
+      }
+      
+      if (exercise.exercisePr) {
+        this.jumpRaw = this.jumpPersent * exercise.exercisePr
+      }
+
+      if (exercise.roundingMode && exercise.smallestJump) {
+        if (exercise.roundingMode === 'Nearest') {
+          this.weeklyJump = Math.round(this.jumpRaw / exercise.smallestJump) * exercise.smallestJump
+        }
+        if (exercise.roundingMode === 'Up') {
+          this.weeklyJump = Math.ceil(this.jumpRaw / exercise.smallestJump) * exercise.smallestJump
+        }
+        if (exercise.roundingMode === 'Down') {
+          this.weeklyJump = Math.floor(this.jumpRaw / exercise.smallestJump) * exercise.smallestJump
+        }
+      }
+    })
+  }
+
+  someName(smallestJump: number, roundingMode: 'Nearest' | 'Up' | 'Down') {
+
   }
 
   generateExercise(): FormExercise {
