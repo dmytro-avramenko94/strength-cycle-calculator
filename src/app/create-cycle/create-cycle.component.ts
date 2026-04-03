@@ -60,10 +60,11 @@ export class CreateCycleComponent {
   jumpPersent = 0
   jumpRaw = 0
   weeklyJump = 0
+  week5Load = 0
 
   onCalculate() {
 
-    this.programInputForm.value.exercises?.map(exercise => {
+    this.programInputForm.value.exercises?.map((exercise, index) => {
       if (exercise.exerciseQty80 && exercise.exerciseQty80 <= 5) {
         this.jumpPersent = 0.05
       } else if (exercise.exerciseQty80 && exercise.exerciseQty80 > 5 && exercise.exerciseQty80 <= 8) {
@@ -89,11 +90,15 @@ export class CreateCycleComponent {
           this.weeklyJump = Math.floor(this.jumpRaw / exercise.smallestJump) * exercise.smallestJump
         }
       }
+
+        if (exercise.desiredWeek5) {
+          this.week5Load = exercise.desiredWeek5
+        } else {
+          this.week5Load = this.week5SuggestedWeight[index]
+        }
+
+        this.generateCycle(exercise, this.week5Load, this.weeklyJump)
     })
-  }
-
-  someName(smallestJump: number, roundingMode: 'Nearest' | 'Up' | 'Down') {
-
   }
 
   generateExercise(): FormExercise {
@@ -154,5 +159,37 @@ export class CreateCycleComponent {
     } else {
       this.desiredWeek5Checked = false
     }
+  }
+
+  
+
+  generateCycle(exercise: Exercise, w5: number, jump: number) {
+    const weeklyLoadData: any[] = []
+
+      let week = 0
+      let sets = 0
+      let reps = 0
+      let load = 0
+
+      for (let i = -4; i < 3; i++) {
+        week = i + 5
+
+        if (week <= 5) {
+          sets = 5
+          reps = 5
+        } else if (week = 6) {
+          sets = 3
+          reps = 3
+        } else {
+          sets = 2
+          reps = 2
+        }
+
+        load = w5 + (i * jump)
+
+        weeklyLoadData.push({week, sets, reps, load})
+      }
+
+      return weeklyLoadData
   }
 }
