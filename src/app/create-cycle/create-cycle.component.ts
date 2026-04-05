@@ -91,13 +91,15 @@ export class CreateCycleComponent {
         }
       }
 
-        if (exercise.desiredWeek5) {
+        if (exercise.desiredWeek5 && exercise.desiredWeek5 > 0) {
           this.week5Load = exercise.desiredWeek5
-        } else {
+        } 
+        if (exercise.desiredWeek5 === 0) {
           this.week5Load = this.week5SuggestedWeight[index]
         }
 
-        this.generateCycle(exercise, this.week5Load, this.weeklyJump)
+        const calculatedCycle = this.generateCycle(this.week5Load, this.weeklyJump)
+        console.log(calculatedCycle) // this row just for outputting cycle data
     })
   }
 
@@ -140,7 +142,20 @@ export class CreateCycleComponent {
 
   week5SuggestedCalculation(exercises: Exercise[]) {
     return exercises.map((exercise: Exercise) => {
-      return exercise.exercisePr * 0.85
+      let suggestedWeek5Load = 0
+
+      if (exercise.roundingMode === 'Nearest') {
+        suggestedWeek5Load = Math.round((exercise.exercisePr * 0.85) / exercise.smallestJump) * exercise.smallestJump
+      }
+      if (exercise.roundingMode === 'Up') {
+        suggestedWeek5Load = Math.ceil((exercise.exercisePr * 0.85) / exercise.smallestJump) * exercise.smallestJump
+      }
+      if (exercise.roundingMode === 'Down') {
+        suggestedWeek5Load = Math.floor((exercise.exercisePr * 0.85) / exercise.smallestJump) * exercise.smallestJump
+      }
+
+      this.week5SuggestedWeight.push(suggestedWeek5Load)
+      return suggestedWeek5Load
     })
   }
 
@@ -163,7 +178,7 @@ export class CreateCycleComponent {
 
   
 
-  generateCycle(exercise: Exercise, w5: number, jump: number) {
+  generateCycle(w5: number, jump: number) {
     const weeklyLoadData: any[] = []
 
       let week = 0
@@ -171,13 +186,13 @@ export class CreateCycleComponent {
       let reps = 0
       let load = 0
 
-      for (let i = -4; i < 3; i++) {
+      for (let i = -4; i <= 2; i++) {
         week = i + 5
 
         if (week <= 5) {
           sets = 5
           reps = 5
-        } else if (week = 6) {
+        }  else if (week === 6) {
           sets = 3
           reps = 3
         } else {
@@ -187,7 +202,7 @@ export class CreateCycleComponent {
 
         load = w5 + (i * jump)
 
-        weeklyLoadData.push({week, sets, reps, load})
+        weeklyLoadData.push({week, sets, reps, load})        
       }
 
       return weeklyLoadData
