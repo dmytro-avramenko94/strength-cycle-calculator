@@ -28,6 +28,13 @@ type Exercise = {
   desiredWeek5: number
 }
 
+type CalculatedResults = {
+  week: number,
+  sets: number,
+  reps: number,
+  load: number
+}
+
 
 @Component({
   selector: 'app-create-cycle',
@@ -57,12 +64,14 @@ export class CreateCycleComponent {
     exercises: this.fb.array<FormExercise>([this.generateExercise()])
   })
 
-  jumpPersent = 0
-  jumpRaw = 0
-  weeklyJump = 0
-  week5Load = 0
+  jumpPersent: number = 0
+  jumpRaw: number = 0
+  weeklyJump: number = 0
+  week5Load: number = 0
+  calculatedCycle: any[] = []
 
   onCalculate() {
+    let calculatedExerciseCycle: any[] = []
 
     this.programInputForm.value.exercises?.map((exercise, index) => {
       if (exercise.exerciseQty80 && exercise.exerciseQty80 <= 5) {
@@ -98,9 +107,20 @@ export class CreateCycleComponent {
           this.week5Load = this.week5SuggestedWeight[index]
         }
 
-        const calculatedCycle = this.generateCycle(this.week5Load, this.weeklyJump)
-        console.log(calculatedCycle) // this row just for outputting cycle data
-    })
+        if (exercise.exerciseName) {
+          calculatedExerciseCycle = this.generateCycle(this.week5Load, this.weeklyJump, exercise.exerciseName)
+        }
+
+        this.calculatedCycle.push(calculatedExerciseCycle)
+      })
+
+      console.log(this.calculatedCycle) // this row just for outputting cycle data
+
+    if(this.programInputForm.value.programName) {
+      this.saveProgramToLocalStorage(this.programInputForm.value.programName, this.calculatedCycle)
+    }
+
+    return this.calculatedCycle
   }
 
   generateExercise(): FormExercise {
@@ -178,7 +198,7 @@ export class CreateCycleComponent {
 
   
 
-  generateCycle(w5: number, jump: number) {
+  generateCycle(w5: number, jump: number, exName: string) {
     const weeklyLoadData: any[] = []
 
       let week = 0
@@ -205,6 +225,14 @@ export class CreateCycleComponent {
         weeklyLoadData.push({week, sets, reps, load})        
       }
 
-      return weeklyLoadData
+      return [exName, weeklyLoadData]
+  }
+
+  saveProgramToLocalStorage(key: string, value: CalculatedResults[]) {
+    localStorage.setItem(key, JSON.stringify(value))
+  }
+
+  getProgramFromLocalStorage(key: string) {
+    localStorage.getItem(key)
   }
 }
