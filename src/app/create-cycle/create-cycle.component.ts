@@ -3,6 +3,7 @@ import { FormGroup, FormControl, FormArray, ReactiveFormsModule, Validators, Non
 import { NgIf, NgForOf, AsyncPipe } from '@angular/common';
 import { debounceTime, Observable, filter, combineLatest, map } from 'rxjs';
 import { exercisesArrayData } from '../../exercises';
+import { LocalStorageService } from '../services/local-storage.service';
 
 
 type FormExercise = FormGroup<{
@@ -44,6 +45,7 @@ type CalculatedResults = {
   styleUrl: './create-cycle.component.css'
 })
 export class CreateCycleComponent {
+  constructor (private localStorageService: LocalStorageService) { }
 
   private fb = inject(NonNullableFormBuilder)
 
@@ -113,14 +115,23 @@ export class CreateCycleComponent {
 
         this.calculatedCycle.push(calculatedExerciseCycle)
       })
+      
+      const programName = this.programInputForm.value.programName
+      const programId = Date.now().toString() + Math.random().toString(16).slice(2)
+      const programData = {
+        id: programId,
+        name: programName,
+        exercises: this.calculatedCycle
+      }
 
-      console.log(this.calculatedCycle) // this row just for outputting cycle data
+      console.log(programData) // this row just for outputting cycle data
 
-    if(this.programInputForm.value.programName) {
-      this.saveProgramToLocalStorage(this.programInputForm.value.programName, this.calculatedCycle)
-    }
+      if(programName) {
+        this.localStorageService.saveProgramToLocalStorage(programId, programData)
+      }
 
-    return this.calculatedCycle
+
+    return programData
   }
 
   generateExercise(): FormExercise {
@@ -226,13 +237,5 @@ export class CreateCycleComponent {
       }
 
       return [exName, weeklyLoadData]
-  }
-
-  saveProgramToLocalStorage(key: string, value: CalculatedResults[]) {
-    localStorage.setItem(key, JSON.stringify(value))
-  }
-
-  getProgramFromLocalStorage(key: string) {
-    localStorage.getItem(key)
   }
 }
